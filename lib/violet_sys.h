@@ -39,7 +39,7 @@ void violet_done();
 void violet_log(const char *msg, ...);
 void violet_close_log();
 
-void violet_make_configs_symbolic();
+void violet_parse_config_targets();
 void get_related_configs(char *config_targets);
 bool is_config_in_targets(const char *name);
 bool is_blacklisted(const char *name);

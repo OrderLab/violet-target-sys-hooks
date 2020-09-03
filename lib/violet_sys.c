@@ -59,9 +59,9 @@ void violet_log(const char *msg, ...)
   va_start(args, msg);
   vsnprintf(buf, sizeof(buf), msg, args);
   va_end(args);
-#ifdef HAVE_VIOLET_S2E
+#ifdef HAVE_LIBVIOLET_S2E
   // if we are executing in S2E, call s2e_printf
-  // s2e_message(buf);
+  s2e_printf("%s", buf);
 #else
   if (violet_log_file == NULL) {
     violet_log_file = fopen(violet_log_file_name, "w");
@@ -80,7 +80,7 @@ void violet_log(const char *msg, ...)
 
 void violet_close_log()
 {
-#ifndef HAVE_VIOLET_S2E
+#ifndef HAVE_LIBVIOLET_S2E
   if (violet_log_file != NULL && violet_log_file != stdout && 
       violet_log_file != stderr) {
     fclose(violet_log_file);
@@ -134,7 +134,7 @@ void my_s2e_make_symbolic(void *buf, size_t size, const char *name)
   } else {
     violet_log("will make %s symbolic: %lu bytes starting at %p\n", name, size, buf);
   }
-#ifdef HAVE_VIOLET_S2E
+#ifdef HAVE_LIBVIOLET_S2E
   s2e_make_symbolic(buf, size, name);
   s2e_printf("actually called S2E to make %s symbolic!!!!\n", name);
 #endif 
@@ -206,31 +206,31 @@ void get_related_configs(char *config_targets) {
     fclose(violet_related_config_file);
 }
 
-void violet_make_configs_symbolic() 
+void violet_parse_config_targets() 
 {
   char* temp = getenv(VIOLET_CONFIGS_ENV_NAME);
   if (temp != NULL) {
     strcpy(sym_config_targets, temp);
     violet_log("The sym_config_targets is %s\n", sym_config_targets);
-#ifdef HAVE_VIOLET_S2E
+#ifdef HAVE_LIBVIOLET_S2E
     s2e_invoke_plugin("LatencyTracker", &sym_config_targets, sizeof(sym_config_targets));
 #endif
   }
   if (sym_config_targets == NULL || strlen(sym_config_targets) == 0) {
+    sym_config_targets_len = 0;
     violet_log("%s environment variable is not set\n", VIOLET_CONFIGS_ENV_NAME);
   } else {
-    sym_config_targets_len = strlen(sym_config_targets);
-    if (sym_config_targets_len > 0 && sym_config_targets_all) {
-      // get related configs if the target config is non-empty and not a wildcard
-      get_related_configs(sym_config_targets);
-    }
-    sym_config_targets_len = strlen(sym_config_targets);
-    violet_log("finish checking the result configuration: %s\n", sym_config_targets);
     if (strcmp(sym_config_targets, "*") == 0) {
       sym_config_targets_all = true;  // wildcard match all configs
       violet_log("will make all configs symbolic; are you sure?\n");
     } else {
       violet_log("will make the following configs symbolic: %s\n", sym_config_targets);
     }
+    if (!sym_config_targets_all) {
+      // get related configs if the target config is non-empty and not a wildcard
+      get_related_configs(sym_config_targets);
+    }
+    sym_config_targets_len = strlen(sym_config_targets);
+    violet_log("finish checking the result configuration: %s\n", sym_config_targets);
   }
 }
