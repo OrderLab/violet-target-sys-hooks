@@ -8,6 +8,11 @@
 //
 
 #include "violet_sys.h"
+#include <violet_config.h>
+
+#ifdef HAVE_LIBVIOLET_S2E
+#include <s2e/s2e.h>
+#endif
 
 char sym_config_targets[1024];
 size_t sym_config_targets_len = 0;
@@ -33,6 +38,9 @@ void violet_init(violet_init_args args)
   if(violet_config_meta_file == NULL) {
     violet_config_meta_file = fopen(violet_config_meta_file_name, "w");
   }
+#ifdef HAVE_LIBVIOLET_S2E
+  s2e_printf("Done with violet init\n");
+#endif
 }
 
 void violet_done()

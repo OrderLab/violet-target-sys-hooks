@@ -1,0 +1,6 @@
+#ifndef _VIOLET_CONFIG_H
+#define _VIOLET_CONFIG_H
+
+#cmakedefine HAVE_LIBVIOLET_S2E
+
+#endif

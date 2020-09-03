@@ -16,9 +16,12 @@ if(DEFINED ENV{S2EDIR})
   SET(S2ESRC "$ENV{S2EDIR}/source/s2e")
   SET(S2ESRC_INCLUDE "${S2ESRC}/guest/common/include")
   include_directories(${S2ESRC_INCLUDE})
-  SET(HAVE_VIOLET_S2E ON CACHE BOOL "Violet S2E test")
+  SET(HAVE_LIBVIOLET_S2E ON CACHE BOOL "libviolet S2E test")
 else()
   MESSAGE(WARNING "S2EDIR environment variable is not set, building libviolet without S2E.")
 endif()
+
+configure_file(config.h.in violet_config.h @ONLY)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(lib)
