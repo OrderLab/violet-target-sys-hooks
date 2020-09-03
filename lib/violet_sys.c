@@ -25,7 +25,6 @@ const char* violet_config_meta_file_name = "configurations.log";
 
 void violet_init(violet_init_args args)
 {
-  sym_config_targets_all = args.target_all_configs;
   sym_config_blacklist = args.config_blacklist;
   violet_log_file_name = args.log_file_name;
   violet_related_config_file_name = args.related_config_file_name;

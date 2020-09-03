@@ -28,10 +28,7 @@ extern "C" {
 #endif
 
 typedef struct {
-  bool target_all_configs;
-  const char *target_configs;
   const char *config_blacklist;
-
   const char *log_file_name;
   const char *related_config_file_name;
   const char *config_meta_file_name;
