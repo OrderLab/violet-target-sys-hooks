@@ -39,7 +39,7 @@ void violet_init(violet_init_args args)
     violet_config_meta_file = fopen(violet_config_meta_file_name, "w");
   }
 #ifdef HAVE_LIBVIOLET_S2E
-  s2e_printf("Done with violet init\n");
+//  s2e_printf("Done with violet init\n");
 #endif
 }
 
@@ -61,7 +61,7 @@ void violet_log(const char *msg, ...)
   va_end(args);
 #ifdef HAVE_LIBVIOLET_S2E
   // if we are executing in S2E, call s2e_printf
-  s2e_printf("%s", buf);
+//  s2e_printf("%s", buf);
 #else
   if (violet_log_file == NULL) {
     violet_log_file = fopen(violet_log_file_name, "w");
