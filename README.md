@@ -17,3 +17,8 @@ $ cd build
 $ cmake .. -DCMAKE_INSTALL_PREFIX=`pwd`/../dist
 $ make && make install
 ```
+## Code Style Format
+
+```bash
+$ clang-format -i -style=file lib/*.c lib/*.h test/*.c
+```

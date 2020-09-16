@@ -1,6 +1,6 @@
-// 
+//
 // The Violet Project
-// 
+//
 // Copyright (c) 2019, Johns Hopkins University - Order Lab.
 //
 //    All rights reserved.
@@ -17,10 +17,10 @@
 
 #include <cJSON.h>
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define VIOLET_CONFIGS_ENV_NAME "VIO_SYM_CONFIGS"
@@ -50,15 +50,16 @@ bool is_config_in_targets(const char *name);
 bool is_blacklisted(const char *name);
 void my_s2e_make_symbolic(void *buf, size_t size, const char *name);
 
-int generate_one_symbolic_request(char** symbolic_request, const char *workload_template_file);
-int generate_multi_symbolic_requests(char** symbolic_requests, const char *options_file, 
-    const char *workload_template_file);
-char* get_symbolic_request_helper(cJSON* current_level); 
-int get_symbolic_requests_helper(cJSON* current_level, char* workloads[], int workload_options [], 
-    int level, int depth);
-int get_workload_helper(cJSON* current_level, int** workload_options); 
-bool read_workload_json(const char* json_file, char **buf, size_t *len); 
-
+int generate_one_symbolic_request(char **symbolic_request,
+                                  const char *workload_template_file);
+int generate_multi_symbolic_requests(char **symbolic_requests,
+                                     const char *options_file,
+                                     const char *workload_template_file);
+char *get_symbolic_request_helper(cJSON *current_level);
+int get_symbolic_requests_helper(cJSON *current_level, char *workloads[],
+                                 int workload_options[], int level, int depth);
+int get_workload_helper(cJSON *current_level, int **workload_options);
+bool read_workload_json(const char *json_file, char **buf, size_t *len);
 
 extern FILE *violet_config_meta_file;
 

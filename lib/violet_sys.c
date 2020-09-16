@@ -31,12 +31,10 @@ const char *config_meta_file_name = "configurations.log";
 static const char *json_configuration_message =
     "Json Configuration is invalid.";
 
-void violet_init(violet_init_args args) 
-{
+void violet_init(violet_init_args args) {
   if (args.config_blacklist != NULL)
     sym_config_blacklist = args.config_blacklist;
-  if (args.log_file_name != NULL)
-    log_file_name = args.log_file_name;
+  if (args.log_file_name != NULL) log_file_name = args.log_file_name;
   if (args.related_config_file_name != NULL)
     related_config_file_name = args.related_config_file_name;
   if (args.config_meta_file_name != NULL)
@@ -50,8 +48,7 @@ void violet_init(violet_init_args args)
 #endif
 }
 
-void violet_done() 
-{
+void violet_done() {
   violet_close_log();
   if (violet_config_meta_file != NULL) {
     fclose(violet_config_meta_file);
@@ -59,8 +56,7 @@ void violet_done()
   }
 }
 
-void violet_log(const char *msg, ...) 
-{
+void violet_log(const char *msg, ...) {
   char buf[512];
   va_list args;
   va_start(args, msg);
@@ -82,8 +78,7 @@ void violet_log(const char *msg, ...)
 #endif
 }
 
-void violet_close_log() 
-{
+void violet_close_log() {
 #ifndef HAVE_LIBVIOLET_S2E
   if (violet_log_file != NULL && violet_log_file != stdout &&
       violet_log_file != stderr) {
@@ -93,8 +88,7 @@ void violet_close_log()
 #endif
 }
 
-bool is_config_in_targets(const char *name) 
-{
+bool is_config_in_targets(const char *name) {
   if (sym_config_targets_len <= 0 || name == NULL) {
     return false;
   }
@@ -128,8 +122,7 @@ bool is_config_in_targets(const char *name)
   return p != NULL;
 }
 
-void my_s2e_make_symbolic(void *buf, size_t size, const char *name) 
-{
+void my_s2e_make_symbolic(void *buf, size_t size, const char *name) {
   if (is_blacklisted(name)) {
     return;
   }
@@ -150,8 +143,7 @@ void my_s2e_make_symbolic(void *buf, size_t size, const char *name)
 #endif
 }
 
-bool is_blacklisted(const char *name) 
-{
+bool is_blacklisted(const char *name) {
   size_t namelen = strlen(name);
   size_t blacklistlen = strlen(sym_config_blacklist);
   if (namelen > blacklistlen) {
@@ -180,8 +172,7 @@ bool is_blacklisted(const char *name)
   return p != NULL;
 }
 
-void get_related_configs(char *config_targets) 
-{
+void get_related_configs(char *config_targets) {
   const char s[2] = ";";
   char *rest = (char *)malloc(strlen(config_targets) * sizeof(char));
   char *target_config, *related_configurations, *line = NULL;
@@ -216,8 +207,7 @@ void get_related_configs(char *config_targets)
   free(rest);
 }
 
-void violet_parse_config_targets() 
-{
+void violet_parse_config_targets() {
   char *temp = getenv(VIOLET_CONFIGS_ENV_NAME);
   if (temp != NULL) {
     strcpy(sym_config_targets, temp);
@@ -249,8 +239,7 @@ void violet_parse_config_targets()
   }
 }
 
-bool read_workload_json(const char* json_file, char **buf, size_t *len) 
-{
+bool read_workload_json(const char *json_file, char **buf, size_t *len) {
   FILE *fjson = fopen(json_file, "r");
   if (!fjson) {
     perror("Cannot open json file");
@@ -276,14 +265,14 @@ bool read_workload_json(const char* json_file, char **buf, size_t *len)
   return true;
 }
 
-int get_workload_helper(cJSON *current_level, int **workload_options) 
-{
+int get_workload_helper(cJSON *current_level, int **workload_options) {
   if (!cJSON_IsObject(current_level)) {
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, "workload has no options, probably reached last level");
 #else
-    fprintf(stderr, "workload '%s' has no options, probably reached last level\n", 
-        current_level->valuestring);
+    fprintf(stderr,
+            "workload '%s' has no options, probably reached last level\n",
+            current_level->valuestring);
     return -1;
 #endif
   }
@@ -292,7 +281,8 @@ int get_workload_helper(cJSON *current_level, int **workload_options)
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, json_configuration_message);
 #else
-    fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+    fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+            options->valuestring);
     return -1;
 #endif
   }
@@ -301,7 +291,8 @@ int get_workload_helper(cJSON *current_level, int **workload_options)
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, json_configuration_message);
 #else
-    fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+    fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+            options->valuestring);
     return -1;
 #endif
   }
@@ -315,7 +306,8 @@ int get_workload_helper(cJSON *current_level, int **workload_options)
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, "Workload option item is not a string");
 #else
-    fprintf(stderr, "Workload option item '%s' is not a string\n", option->valuestring);
+    fprintf(stderr, "Workload option item '%s' is not a string\n",
+            option->valuestring);
     return -1;
 #endif
   }
@@ -339,23 +331,24 @@ int get_workload_helper(cJSON *current_level, int **workload_options)
   return get_workload_helper(next_level, workload_options);
 }
 
-char* get_symbolic_request_helper(cJSON* current_level)
-{
+char *get_symbolic_request_helper(cJSON *current_level) {
   if (!cJSON_IsObject(current_level)) {
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, "workload has no options, probably reached last level");
 #else
-    fprintf(stderr, "workload '%s' has no options, probably reached last level\n", 
-        current_level->valuestring);
+    fprintf(stderr,
+            "workload '%s' has no options, probably reached last level\n",
+            current_level->valuestring);
     return NULL;
 #endif
   }
-  cJSON* options = cJSON_GetObjectItemCaseSensitive(current_level, "options");
+  cJSON *options = cJSON_GetObjectItemCaseSensitive(current_level, "options");
   if (!cJSON_IsArray(options)) {
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, json_configuration_message);
 #else
-    fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+    fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+            options->valuestring);
     return NULL;
 #endif
   }
@@ -364,7 +357,8 @@ char* get_symbolic_request_helper(cJSON* current_level)
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, json_configuration_message);
 #else
-    fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+    fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+            options->valuestring);
     return NULL;
 #endif
   }
@@ -373,27 +367,29 @@ char* get_symbolic_request_helper(cJSON* current_level)
   s2e_make_symbolic(&index, sizeof(int), "index");
   s2e_assume(index >= 0 && index < size);
 #endif
-  cJSON* option = cJSON_GetArrayItem(options, index);
+  cJSON *option = cJSON_GetArrayItem(options, index);
   if (!cJSON_IsString(option)) {
 #ifdef HAVE_VIOLET_S2E
     s2e_kill_state(1, "Workload option item is not a string");
 #else
-    fprintf(stderr, "Workload option item '%s' is not a string\n", option->valuestring);
+    fprintf(stderr, "Workload option item '%s' is not a string\n",
+            option->valuestring);
     return NULL;
 #endif
   }
-  char* option_string = option->valuestring;
-  cJSON* next_level = cJSON_GetObjectItemCaseSensitive(current_level, option_string);
+  char *option_string = option->valuestring;
+  cJSON *next_level =
+      cJSON_GetObjectItemCaseSensitive(current_level, option_string);
   if (cJSON_IsString(next_level)) {
     return next_level->valuestring;
   }
   return get_symbolic_request_helper(next_level);
 }
 
-int get_symbolic_requests_helper(cJSON* current_level, char* workloads[], int workload_options[], 
-      int level, int depth) {
-  cJSON* target_level = current_level;
-  cJSON* jsons[MAX_SYMBOLIC_REQUEST_TYPE];
+int get_symbolic_requests_helper(cJSON *current_level, char *workloads[],
+                                 int workload_options[], int level, int depth) {
+  cJSON *target_level = current_level;
+  cJSON *jsons[MAX_SYMBOLIC_REQUEST_TYPE];
   int jsons_depth = 0;
   int workloads_depth = 0;
 
@@ -402,17 +398,19 @@ int get_symbolic_requests_helper(cJSON* current_level, char* workloads[], int wo
 #ifdef HAVE_VIOLET_S2E
       s2e_kill_state(1, "workload has no options, probably reached last level");
 #else
-      fprintf(stderr, "workload '%s' has no options, probably reached last level\n", 
-          target_level->valuestring);
+      fprintf(stderr,
+              "workload '%s' has no options, probably reached last level\n",
+              target_level->valuestring);
       return -1;
 #endif
     }
-    cJSON* options = cJSON_GetObjectItemCaseSensitive(target_level, "options");
+    cJSON *options = cJSON_GetObjectItemCaseSensitive(target_level, "options");
     if (!cJSON_IsArray(options)) {
 #ifdef HAVE_VIOLET_S2E
       s2e_kill_state(1, json_configuration_message);
 #else
-      fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+      fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+              options->valuestring);
       return -1;
 #endif
     }
@@ -421,21 +419,24 @@ int get_symbolic_requests_helper(cJSON* current_level, char* workloads[], int wo
 #ifdef HAVE_VIOLET_S2E
       s2e_kill_state(1, json_configuration_message);
 #else
-      fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+      fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+              options->valuestring);
       return -1;
 #endif
     }
-    cJSON* option = cJSON_GetArrayItem(options, workload_options[level]);
+    cJSON *option = cJSON_GetArrayItem(options, workload_options[level]);
     if (!cJSON_IsString(option)) {
 #ifdef HAVE_VIOLET_S2E
       s2e_kill_state(1, json_configuration_message);
 #else
-      fprintf(stderr, "%s: '%s'\n", json_configuration_message, option->valuestring);
+      fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+              option->valuestring);
       return -1;
 #endif
     }
-    char* option_string = option->valuestring;
-    target_level = cJSON_GetObjectItemCaseSensitive(target_level, option_string);
+    char *option_string = option->valuestring;
+    target_level =
+        cJSON_GetObjectItemCaseSensitive(target_level, option_string);
     level++;
     if (level > depth) {
       jsons[jsons_depth] = target_level;
@@ -444,7 +445,7 @@ int get_symbolic_requests_helper(cJSON* current_level, char* workloads[], int wo
   }
 
   while (jsons_depth > 0) {
-    cJSON* current_level = jsons[jsons_depth-1];
+    cJSON *current_level = jsons[jsons_depth - 1];
     jsons_depth--;
     if (cJSON_IsString(current_level)) {
       (workloads)[workloads_depth] = current_level->valuestring;
@@ -455,17 +456,19 @@ int get_symbolic_requests_helper(cJSON* current_level, char* workloads[], int wo
 #ifdef HAVE_VIOLET_S2E
       s2e_kill_state(1, "workload has no options, probably reached last level");
 #else
-      fprintf(stderr, "workload '%s' has no options, probably reached last level\n", 
-          current_level->valuestring);
+      fprintf(stderr,
+              "workload '%s' has no options, probably reached last level\n",
+              current_level->valuestring);
       return -1;
 #endif
     }
-    cJSON* options = cJSON_GetObjectItemCaseSensitive(current_level, "options");
+    cJSON *options = cJSON_GetObjectItemCaseSensitive(current_level, "options");
     if (!cJSON_IsArray(options)) {
 #ifdef HAVE_VIOLET_S2E
       s2e_kill_state(1, json_configuration_message);
 #else
-      fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+      fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+              options->valuestring);
       return -1;
 #endif
     }
@@ -474,56 +477,64 @@ int get_symbolic_requests_helper(cJSON* current_level, char* workloads[], int wo
 #ifdef HAVE_VIOLET_S2E
       s2e_kill_state(1, json_configuration_message);
 #else
-      fprintf(stderr, "%s: '%s'\n", json_configuration_message, options->valuestring);
+      fprintf(stderr, "%s: '%s'\n", json_configuration_message,
+              options->valuestring);
       return -1;
 #endif
     }
-    for (int i=0;i<size;i++) {
-      char* option_string = cJSON_GetArrayItem(options, i)->valuestring;
-      jsons[jsons_depth] = cJSON_GetObjectItemCaseSensitive(current_level, option_string);
+    for (int i = 0; i < size; i++) {
+      char *option_string = cJSON_GetArrayItem(options, i)->valuestring;
+      jsons[jsons_depth] =
+          cJSON_GetObjectItemCaseSensitive(current_level, option_string);
       jsons_depth++;
     }
   }
   return workloads_depth;
 }
 
-int generate_one_symbolic_request(char** symbolic_request, const char *workload_template_file)
-{
-  char *workload_json_str; size_t workload_str_len;
-  if (!read_workload_json(workload_template_file, &workload_json_str, &workload_str_len)) {
+int generate_one_symbolic_request(char **symbolic_request,
+                                  const char *workload_template_file) {
+  char *workload_json_str;
+  size_t workload_str_len;
+  if (!read_workload_json(workload_template_file, &workload_json_str,
+                          &workload_str_len)) {
     violet_log("failed to load workload template file\n");
     return -1;
   }
   cJSON *current_level = cJSON_Parse(workload_json_str);
   char *request_value = get_symbolic_request_helper(current_level);
   if (request_value == NULL) {
-    violet_log("failed to get symbolic request for %s\n", current_level->valuestring);
+    violet_log("failed to get symbolic request for %s\n",
+               current_level->valuestring);
     return -1;
   }
   int request_length = strlen(request_value);
-  *symbolic_request = (char*) malloc(sizeof(char) * request_length);
+  *symbolic_request = (char *)malloc(sizeof(char) * request_length);
   strcpy(*symbolic_request, request_value);
   cJSON_Delete(current_level);
   return request_length;
 }
 
-int generate_multi_symbolic_requests(char** symbolic_requests, const char *options_file, 
-    const char *workload_template_file) 
-{
-  char *options_str; size_t options_str_len;
+int generate_multi_symbolic_requests(char **symbolic_requests,
+                                     const char *options_file,
+                                     const char *workload_template_file) {
+  char *options_str;
+  size_t options_str_len;
   if (!read_workload_json(options_file, &options_str, &options_str_len)) {
     violet_log("failed to load options file\n");
     return -1;
   }
-  char *workload_json_str; size_t workload_str_len;
-  if (!read_workload_json(workload_template_file, &workload_json_str, &workload_str_len)) {
+  char *workload_json_str;
+  size_t workload_str_len;
+  if (!read_workload_json(workload_template_file, &workload_json_str,
+                          &workload_str_len)) {
     violet_log("failed to load workload template file\n");
     return -1;
   }
   cJSON *current_level = cJSON_Parse(options_str);
-  int* workload_options, option_length;
+  int *workload_options, option_length;
   option_length = get_workload_helper(current_level, &workload_options);
   current_level = cJSON_Parse(workload_json_str);
-  return get_symbolic_requests_helper(current_level, symbolic_requests, workload_options, 
-      0, option_length-1);
+  return get_symbolic_requests_helper(current_level, symbolic_requests,
+                                      workload_options, 0, option_length - 1);
 }
