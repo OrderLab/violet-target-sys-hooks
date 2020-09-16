@@ -174,7 +174,8 @@ bool is_blacklisted(const char *name) {
 
 void get_related_configs(char *config_targets) {
   const char s[2] = ";";
-  char *rest = (char *)malloc(strlen(config_targets) * sizeof(char));
+  char *rest_buf = (char *)malloc(strlen(config_targets) * sizeof(char));
+  char *rest = rest_buf;
   char *target_config, *related_configurations, *line = NULL;
   size_t len = 0;
 
@@ -183,8 +184,8 @@ void get_related_configs(char *config_targets) {
   while (target_config != NULL) {
     violet_related_config_file = fopen(related_config_file_name, "r");
     if (violet_related_config_file == NULL) {
-      fprintf(stderr, "related configuration file %s does not exist\n",
-              related_config_file_name);
+      violet_log("related configuration file %s does not exist\n", 
+          related_config_file_name);
       break;
     }
     while ((getline(&line, &len, violet_related_config_file)) != -1) {
@@ -204,7 +205,7 @@ void get_related_configs(char *config_targets) {
     target_config = strtok_r(rest, s, &rest);
   }
   if (violet_related_config_file != NULL) fclose(violet_related_config_file);
-  free(rest);
+  free(rest_buf);
 }
 
 void violet_parse_config_targets() {
@@ -217,7 +218,7 @@ void violet_parse_config_targets() {
                       sizeof(sym_config_targets));
 #endif
   }
-  if (sym_config_targets == NULL || strlen(sym_config_targets) == 0) {
+  if (strlen(sym_config_targets) == 0) {
     sym_config_targets_len = 0;
     violet_log("%s environment variable is not set\n", VIOLET_CONFIGS_ENV_NAME);
   } else {
