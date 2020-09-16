@@ -1,0 +1,1 @@
+{ "options":["read","insert","update","write"],"read":{"options": ["range","write","only","point"],"range":[0,1],"only":[0],"point":[0,0]},"insert":[1],"update": {"options":["no_index","index"],"no_index":[2,0],"index": [2,1]},"write":[2]}
