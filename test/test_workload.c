@@ -7,12 +7,12 @@ int main(int argc, char* argv[]) {
   violet_init(args);
   if (argc == 2) {
     char* request = NULL;
-    generate_one_symbolic_request(&request, argv[1]);
+    gen_one_symbolic_request_from_file(&request, argv[1]);
     if (request != NULL) violet_log("generated on request: %s\n", request);
   } else if (argc == 3) {
     char* requests[MAX_SYMBOLIC_REQUEST_TYPE];
     int requests_len =
-        generate_multi_symbolic_requests(requests, argv[1], argv[2]);
+        gen_multi_symbolic_requests_from_file(requests, argv[1], argv[2]);
     if (requests_len > 0) {
       for (int i = 0; i < requests_len; i++) {
         violet_log("generated request %d: %s\n", i + 1, requests[i]);

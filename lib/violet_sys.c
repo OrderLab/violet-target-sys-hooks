@@ -265,6 +265,11 @@ bool read_workload_json(const char *json_file, char **buf, size_t *len) {
   return true;
 }
 
+char *get_symbolic_request_helper(cJSON *current_level);
+int get_symbolic_requests_helper(cJSON *current_level, char *workloads[],
+                                 int workload_options[], int level, int depth);
+int get_workload_helper(cJSON *current_level, int **workload_options);
+
 int get_workload_helper(cJSON *current_level, int **workload_options) {
   if (!cJSON_IsObject(current_level)) {
 #ifdef HAVE_VIOLET_S2E
@@ -492,16 +497,9 @@ int get_symbolic_requests_helper(cJSON *current_level, char *workloads[],
   return workloads_depth;
 }
 
-int generate_one_symbolic_request(char **symbolic_request,
-                                  const char *workload_template_file) {
-  char *workload_json_str;
-  size_t workload_str_len;
-  if (!read_workload_json(workload_template_file, &workload_json_str,
-                          &workload_str_len)) {
-    violet_log("failed to load workload template file\n");
-    return -1;
-  }
-  cJSON *current_level = cJSON_Parse(workload_json_str);
+int gen_one_symbolic_request_from_str(char **symbolic_request,
+                                      const char *workload_template_str) {
+  cJSON *current_level = cJSON_Parse(workload_template_str);
   char *request_value = get_symbolic_request_helper(current_level);
   if (request_value == NULL) {
     violet_log("failed to get symbolic request for %s\n",
@@ -515,9 +513,32 @@ int generate_one_symbolic_request(char **symbolic_request,
   return request_length;
 }
 
-int generate_multi_symbolic_requests(char **symbolic_requests,
-                                     const char *options_file,
-                                     const char *workload_template_file) {
+int gen_one_symbolic_request_from_file(char **symbolic_request,
+                                       const char *workload_template_file) {
+  char *workload_json_str;
+  size_t workload_str_len;
+  if (!read_workload_json(workload_template_file, &workload_json_str,
+                          &workload_str_len)) {
+    violet_log("failed to load workload template file\n");
+    return -1;
+  }
+  return gen_one_symbolic_request_from_str(symbolic_request, workload_json_str);
+}
+
+int gen_multi_symbolic_requests_from_strs(char **symbolic_requests,
+                                          const char *options_str,
+                                          const char *workload_template_str) {
+  cJSON *current_level = cJSON_Parse(options_str);
+  int *workload_options, option_length;
+  option_length = get_workload_helper(current_level, &workload_options);
+  current_level = cJSON_Parse(workload_template_str);
+  return get_symbolic_requests_helper(current_level, symbolic_requests,
+                                      workload_options, 0, option_length - 1);
+}
+
+int gen_multi_symbolic_requests_from_file(char **symbolic_requests,
+                                          const char *options_file,
+                                          const char *workload_template_file) {
   char *options_str;
   size_t options_str_len;
   if (!read_workload_json(options_file, &options_str, &options_str_len)) {
@@ -531,10 +552,6 @@ int generate_multi_symbolic_requests(char **symbolic_requests,
     violet_log("failed to load workload template file\n");
     return -1;
   }
-  cJSON *current_level = cJSON_Parse(options_str);
-  int *workload_options, option_length;
-  option_length = get_workload_helper(current_level, &workload_options);
-  current_level = cJSON_Parse(workload_json_str);
-  return get_symbolic_requests_helper(current_level, symbolic_requests,
-                                      workload_options, 0, option_length - 1);
+  return gen_multi_symbolic_requests_from_strs(symbolic_requests, options_str,
+                                               workload_json_str);
 }

@@ -13,6 +13,8 @@ project(violet_lib)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter")
+
 if(DEFINED ENV{S2EDIR})
   MESSAGE(STATUS "S2EDIR is set to $ENV{S2EDIR}")
   SET(S2ESRC "$ENV{S2EDIR}/source/s2e")
