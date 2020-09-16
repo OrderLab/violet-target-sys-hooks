@@ -17,6 +17,39 @@ $ cd build
 $ cmake .. -DCMAKE_INSTALL_PREFIX=`pwd`/../dist
 $ make && make install
 ```
+
+## Testing
+
+
+### Normal environment testing
+
+
+```bash
+$ unset S2EDIR
+$ rm -rf build
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=DEBUG  -DCMAKE_C_FLAGS_DEBUG="-g -O0" -DCMAKE_CXX_FLAGS_DEBUG="-g -O0" ..
+$ make -j4
+$ cd test
+```
+
+
+1. Test generating single request based on a sample workload template file:
+
+```bash
+$ ./test_workload ../../test/template.json
+```
+
+2. Test generating multiple requests based on workload option file and workload template file:
+
+```bash
+$ ./test_workload ../../test/options.json ../../test/template.json 
+```
+
+### S2E environment testing
+
+TBA
+
 ## Code Style Format
 
 ```bash
